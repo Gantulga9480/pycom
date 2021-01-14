@@ -82,7 +82,6 @@ class MQTTClient:
             msg[9] |= 0x4 | (self.lw_qos & 0x1) << 3 | (self.lw_qos & 0x2) << 3
             msg[9] |= self.lw_retain << 5
         self.sock.write(msg)
-        #print(hex(len(msg)), hexlify(msg, ":"))
         self._send_str(self.client_id)
         if self.lw_topic:
             self._send_str(self.lw_topic)
@@ -116,7 +115,6 @@ class MQTTClient:
             sz >>= 7
             i += 1
         pkt[i] = sz
-        #print(hex(len(pkt)), hexlify(pkt, ":"))
         self.sock.write(pkt, i + 1)
         self._send_str(topic)
         if qos > 0:
@@ -143,7 +141,6 @@ class MQTTClient:
         pkt = bytearray(b"\x82\0\0\0")
         self.pid += 1
         struct.pack_into("!BH", pkt, 1, 2 + 2 + len(topic) + 1, self.pid)
-        #print(hex(len(pkt)), hexlify(pkt, ":"))
         self.sock.write(pkt)
         self._send_str(topic)
         self.sock.write(qos.to_bytes(1, "little"))
@@ -168,7 +165,7 @@ class MQTTClient:
             return None
         if res == b"":
             raise OSError(-1)
-        if res == b"\xd0":  # PINGRESP
+        if res == b"\xd0":  
             sz = self.sock.read(1)[0]
             assert sz == 0
             return None
