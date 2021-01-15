@@ -8,16 +8,23 @@ import pycom
 from lib.GridEye import GridEye
 
 SENSOR_START = False
+TRY = True
 SENSOR = 2
 
 def sub_cb(topic, msg):
-    global SENSOR_START
-    print(msg)
-    data = msg.payload.encode("utf-8")
-    if data == "1":
+    global SENSOR_START, TRY
+    if msg == b'2':
         SENSOR_START = True
-    else:
+        time.sleep(0.1)
+        pycom.rgbled(0x00ff00)
+        time.sleep(0.1)
+    elif msg == b'1':
         SENSOR_START = False
+        time.sleep(0.1)
+        pycom.rgbled(0x0000ff)
+        time.sleep(0.1)
+    elif msg == b'0':
+         TRY = False
 
 # Wifi not connected
 pycom.heartbeat(False)
@@ -31,49 +38,49 @@ wlan.connect("Univision_83A3", auth=(WLAN.WPA2, "88640783"))
 while not wlan.isconnected():  
     machine.idle()
 time.sleep(0.1)
-pycom.rgbled(0x7D7D00)
+pycom.rgbled(0x00007D)
 time.sleep(0.1)
  
 # client connection
-client = MQTTClient("wipy1", "192.168.1.2", port=1883) 
-client.set_callback(sub_cb) 
+client = MQTTClient("wipy{}".format(SENSOR), "192.168.1.2", port=1883) 
+client.set_callback(sub_cb)
 client.connect()
 # client connected
 time.sleep(0.1)
-pycom.rgbled(0xffff00)
+pycom.rgbled(0x0000ff)
 time.sleep(0.1)
-client.publish("status/sensor", "s-{}-c".format(SENSOR))
-client.subscribe(topic="wipy/sensor-start")
+client.subscribe(topic="wipy/sensor-start", qos=0)
 time.sleep(0.1)
-while not SENSOR_START:
-    client.publish("status/sensor", "sensor-{} waiting".format(SENSOR))
-    time.sleep(1)
-
 # using GridEye to get readings
 ge = GridEye()
 ge.reset(flags_only=True)
 time.sleep(0.1)
 
-time.sleep(0.1)
-pycom.rgbled(0x00ff00)
-time.sleep(0.1)
 count = 0
 # Publishing data
-while SENSOR_START:
-    count = count + 1
-    # return a 8x8 matrix + min&max heats out of them
-    image = ge.get_sensor_data("GRAYIMAGE")
-    image_data=str(image[0])
-    if (count>2):
-        # publish image_data to "sensors/sensor1" topic
-        client.publish("sensors/sensor{}".format(SENSOR), image_data)
-        count = 3
-        time.sleep(0.1)
+while TRY:
+    if SENSOR_START:
+        count = count + 1
+        # return a 8x8 matrix + min&max heats out of them
+        image = ge.get_sensor_data("GRAYIMAGE")
+        image_data=str(image[0])
+        if (count>2):
+            if count == 23:
+                client.publish("sensors/sensor{}/status".format(SENSOR), "c")
+                count = 3
+            # publish image_data to "sensors/sensor1" topic
+            client.publish("sensors/sensor{}/data".format(SENSOR), image_data)
+            time.sleep(0.05)
+        else:
+            client.publish("sensors/sensor{}/status".format(SENSOR), "c")
+            time.sleep(0.1)
     else:
-        time.sleep(0.1)
+        count = 0
+        client.publish("sensors/sensor{}/status".format(SENSOR), "w")
+        time.sleep(1)
     client.check_msg()
 # client disconnected
-client.publish("status/sensor", "s-{}-d".format(SENSOR))
+client.publish("sensors/sensor{}/status".format(SENSOR), "d")
 time.sleep(0.1)
 pycom.rgbled(0xff0000)
 time.sleep(1)
