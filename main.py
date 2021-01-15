@@ -42,11 +42,11 @@ client.connect()
 time.sleep(0.1)
 pycom.rgbled(0xffff00)
 time.sleep(0.1)
-client.publish("status/sensor", f"s-{SENSOR}-c")
+client.publish("status/sensor", "s-{}-c".format(SENSOR))
 client.subscribe(topic="wipy/sensor-start")
 time.sleep(0.1)
 while not SENSOR_START:
-    client.publish("status/sensor", f"sensor-{SENSOR} waiting")
+    client.publish("status/sensor", "sensor-{} waiting".format(SENSOR))
     time.sleep(1)
 
 # using GridEye to get readings
@@ -66,13 +66,13 @@ while SENSOR_START:
     image_data=str(image[0])
     if (count>2):
         # publish image_data to "sensors/sensor1" topic
-        client.publish(f"sensors/sensor{SENSOR}", image_data)
+        client.publish("sensors/sensor{}".format(SENSOR), image_data)
         count = 3
         time.sleep(0.1)
     else:
         time.sleep(0.1)
 # client disconnected
-client.publish("status/sensor", f"s-{SENSOR}-d")
+client.publish("status/sensor", "s-{}-d".format(SENSOR))
 time.sleep(0.1)
 pycom.rgbled(0xff0000)
 time.sleep(1)
