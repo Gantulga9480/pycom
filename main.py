@@ -13,7 +13,7 @@ def sub_cb(topic, msg):
 pycom.heartbeat(False)
 time.sleep(0.1)
 pycom.rgbled(0xff0000)
-wlan = WLAN(mode=WLAN.STA) 
+wlan = WLAN(mode=WLAN.STA)
 wlan.connect("Univision_83A3", auth=(WLAN.WPA2, "88640783"), timeout=5000) 
 while not wlan.isconnected():  
     machine.idle()
@@ -66,5 +66,4 @@ while True:
         client.publish("sensors/sensor1", string_matrix)
         time.sleep(0.1)
     else:
-        print("Starting...")
         time.sleep(1)
