@@ -28,6 +28,7 @@ client.connect()
 time.sleep(0.1)
 pycom.rgbled(0xffff00)
 time.sleep(0.1)
+client.publish("status/sensor", "s-1")
 
 # using GridEye to get readings
 ge = GridEye()
@@ -54,13 +55,13 @@ while True:
     # return a 8x8 matrix + min&max heats out of them
     image = ge.get_sensor_data("GRAYIMAGE")
     # convert it to string to extract usefull info only [8x8 matrix]
-    image_data=str(image[0])
+    # image_data=str(image[0])
     # remove non-usefull informations
     # string_matrix=image_data[1:len(image_data)]
     # string_matrix=string_matrix.rsplit(",", 2)[0]
     if (count>2):
         # publish string_matrix to "sensors/sensor1" topic
-        client.publish("sensors/sensor1", image_data)
+        client.publish("sensors/sensor1", image[0])
         # time.sleep(0.1)
     else:
         time.sleep(1)
