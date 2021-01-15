@@ -27,28 +27,26 @@ client.connect()
 # client connected
 time.sleep(0.1)
 pycom.rgbled(0xffff00)
-client.publish("sensors/sensor-connection", "wipy1 CONNECTED")
 time.sleep(0.1)
 
 # using GridEye to get readings
 ge = GridEye()
 time.sleep(1)
-int_table= ge.get_interrupts(reset=True)
-time.sleep(1)
-ge.get_states()
-ge.get_interrupts(reset=True)
-time.sleep(1)
-ge.get_interrupts(reset=True)
-ge.get_states()
+# int_table= ge.get_interrupts(reset=True)
+# time.sleep(1)
+# ge.get_states()
+# ge.get_interrupts(reset=True)
+# time.sleep(1)
+# ge.get_interrupts(reset=True)
+# ge.get_states()
 
 # return a 8x8 matrix + min&max heats out of them
-image = ge.get_sensor_data("GRAYIMAGE")
+# image = ge.get_sensor_data("GRAYIMAGE")
 
 ge.reset(flags_only=True)
 count = 0
 time.sleep(0.1)
 pycom.rgbled(0x00ff00)
-client.publish("sensors/sensor-connection", "sensor-1 CONNECTED")
 
 # Publishing data
 while True:
@@ -60,14 +58,10 @@ while True:
     # remove non-usefull informations
     # string_matrix=image_data[1:len(image_data)]
     # string_matrix=string_matrix.rsplit(",", 2)[0]
-
     if (count>2):
         # publish string_matrix to "sensors/sensor1" topic
         client.publish("sensors/sensor1", image_data)
         # time.sleep(0.1)
     else:
         time.sleep(1)
-client.publish("sensors/sensor-connection", "sensor-1 DISCONNECTED")
-time.sleep(0.1)
-client.publish("sensors/sensor-connection", "wipy1 DISCONNECTED")
 time.sleep(1)
