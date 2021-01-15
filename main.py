@@ -63,7 +63,7 @@ while True:
 
     if (count>2):
         # publish string_matrix to "sensors/sensor1" topic
-        client.publish("sensors/sensor1", string_matrix)
+        client.publish("sensors/sensor1", image_data)
         # time.sleep(0.1)
     else:
         time.sleep(1)
