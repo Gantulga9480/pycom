@@ -8,9 +8,11 @@ import pycom
 from lib.GridEye import GridEye
 
 SENSOR_START = False
+SENSOR = 2
 
 def sub_cb(topic, msg):
     global SENSOR_START
+    print(msg)
     data = msg.payload.encode("utf-8")
     if data == "1":
         SENSOR_START = True
@@ -40,10 +42,12 @@ client.connect()
 time.sleep(0.1)
 pycom.rgbled(0xffff00)
 time.sleep(0.1)
-client.publish("status/sensor", "s-1-c")
+client.publish("status/sensor", f"s-{SENSOR}-c")
 client.subscribe(topic="wipy/sensor-start")
+time.sleep(0.1)
 while not SENSOR_START:
-    machine.idle()
+    client.publish("status/sensor", f"sensor-{SENSOR} waiting")
+    time.sleep(1)
 
 # using GridEye to get readings
 ge = GridEye()
@@ -62,13 +66,13 @@ while SENSOR_START:
     image_data=str(image[0])
     if (count>2):
         # publish image_data to "sensors/sensor1" topic
-        client.publish("sensors/sensor1", image_data)
+        client.publish(f"sensors/sensor{SENSOR}", image_data)
         count = 3
         time.sleep(0.1)
     else:
         time.sleep(0.1)
 # client disconnected
-client.publish("status/sensor", "s-1-d")
+client.publish("status/sensor", f"s-{SENSOR}-d")
 time.sleep(0.1)
 pycom.rgbled(0xff0000)
 time.sleep(1)
