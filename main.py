@@ -7,8 +7,15 @@ import time
 import pycom
 from lib.GridEye import GridEye
 
-def sub_cb(topic, msg): 
-    print(msg)
+SENSOR_START = False
+
+def sub_cb(topic, msg):
+    global SENSOR_START
+    data = msg.payload.encode("utf-8")
+    if data == "1":
+        SENSOR_START = True
+    else:
+        SENSOR_START = False
 
 # Wifi not connected
 pycom.heartbeat(False)
@@ -34,6 +41,9 @@ time.sleep(0.1)
 pycom.rgbled(0xffff00)
 time.sleep(0.1)
 client.publish("status/sensor", "s-1-c")
+client.subscribe(topic="wipy/sensor-start")
+while not SENSOR_START:
+    machine.idle()
 
 # using GridEye to get readings
 ge = GridEye()
@@ -43,10 +53,9 @@ time.sleep(0.1)
 time.sleep(0.1)
 pycom.rgbled(0x00ff00)
 time.sleep(0.1)
-
 count = 0
 # Publishing data
-while True:
+while SENSOR_START:
     count = count + 1
     # return a 8x8 matrix + min&max heats out of them
     image = ge.get_sensor_data("GRAYIMAGE")
