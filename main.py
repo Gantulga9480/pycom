@@ -71,6 +71,7 @@ while SENSOR_START:
         time.sleep(0.1)
     else:
         time.sleep(0.1)
+    client.check_msg()
 # client disconnected
 client.publish("status/sensor", "s-{}-d".format(SENSOR))
 time.sleep(0.1)
