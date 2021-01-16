@@ -42,9 +42,6 @@ client = MQTTClient("wipy{}".format(SENSOR), "192.168.1.2", port=1883)
 client.set_callback(sub_cb)
 client.connect()
 # client connected
-time.sleep(0.1)
-pycom.rgbled(0x0000ff)
-time.sleep(0.1)
 client.subscribe(topic="wipy/sensor-start", qos=0)
 time.sleep(0.1)
 # using GridEye to get readings
@@ -64,6 +61,9 @@ ge.get_states()
 image = ge.get_sensor_data()
 ge.reset(flags_only=True)
 time.sleep(0.1)
+pycom.rgbled(0x0000ff)
+time.sleep(0.1)
+time.sleep(0.1)
 
 count = 0
 # Publishing data
@@ -77,11 +77,12 @@ while TRY:
             client.publish("sensors/sensor{}/status".format(SENSOR), "d")
         image_data=str(image[0])
         if (count>2):
-            if count == 23:
+            if count == 33:
                 client.publish("sensors/sensor{}/status".format(SENSOR), "c")
                 count = 3
             # publish image_data to "sensors/sensor1" topic
             client.publish("sensors/sensor{}/data".format(SENSOR), image_data)
+            time.sleep(0.001)
         else:
             client.publish("sensors/sensor{}/status".format(SENSOR), "c")
             time.sleep(0.1)
@@ -93,5 +94,5 @@ while TRY:
 # client disconnected
 client.publish("sensors/sensor{}/status".format(SENSOR), "d")
 time.sleep(0.1)
-pycom.rgbled(0xff0000)
-time.sleep(1)
+pycom.rgbled(0xff00ff)
+time.sleep(5)
