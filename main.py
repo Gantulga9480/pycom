@@ -8,7 +8,7 @@ from lib.GridEye import GridEye
 
 SENSOR_START = False
 TRY = True
-SENSOR = 5
+SENSOR = 6
 
 def sub_cb(topic, msg):
     global SENSOR_START, TRY
@@ -43,26 +43,11 @@ client.set_callback(sub_cb)
 client.connect()
 # client connected
 client.subscribe(topic="wipy/sensor-start", qos=0)
-time.sleep(0.1)
 # using GridEye to get readings
 ge = GridEye()
-time.sleep(5)
-
-int_table= ge.get_interrupts(reset=True)
-
-time.sleep(5)
-ge.get_states()
-ge.get_interrupts(reset=True)
-time.sleep(5)
-ge.get_interrupts(reset=True)
-ge.get_states()
-
-# return a 8x8 matrix + min&max heats out of them
-image = ge.get_sensor_data()
 ge.reset(flags_only=True)
 time.sleep(0.1)
 pycom.rgbled(0x0000ff)
-time.sleep(0.1)
 time.sleep(0.1)
 
 count = 0
