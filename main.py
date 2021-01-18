@@ -6,24 +6,10 @@ import time
 import pycom
 from lib.GridEye import GridEye
 
-SENSOR_START = False
-TRY = True
 SENSOR = 6
 
 def sub_cb(topic, msg):
-    global SENSOR_START, TRY
-    if msg == b'2':
-        SENSOR_START = True
-        time.sleep(0.1)
-        pycom.rgbled(0x00ff00)
-        time.sleep(0.1)
-    elif msg == b'1':
-        SENSOR_START = False
-        time.sleep(0.1)
-        pycom.rgbled(0x0000ff)
-        time.sleep(0.1)
-    elif msg == b'0':
-         TRY = False
+    pass
 
 # Wifi not connected
 pycom.heartbeat(False)
@@ -38,46 +24,33 @@ while not wlan.isconnected():
     machine.idle()
 
 # client connection
-client = MQTTClient("wipy{}".format(SENSOR), "192.168.1.2", port=1883) 
+client = MQTTClient("wipy{}".format(SENSOR), "192.168.1.60", port=1883) 
 client.set_callback(sub_cb)
 client.connect()
-# client connected
-client.subscribe(topic="wipy/sensor-start", qos=0)
+
 # using GridEye to get readings
 ge = GridEye()
 ge.reset(flags_only=True)
-time.sleep(0.1)
-pycom.rgbled(0x0000ff)
-time.sleep(0.1)
 
 count = 0
 # Publishing data
-while TRY:
-    if SENSOR_START:
-        count = count + 1
-        # return a 8x8 matrix + min&max heats out of them
-        try:
-            image = ge.get_sensor_data()
-        except:
-            client.publish("sensors/sensor{}/status".format(SENSOR), "d")
-        image_data=str(image[0])
-        if (count>2):
-            if count == 33:
-                client.publish("sensors/sensor{}/status".format(SENSOR), "c")
-                count = 3
-            # publish image_data to "sensors/sensor1" topic
-            client.publish("sensors/sensor{}/data".format(SENSOR), image_data)
-            time.sleep(0.001)
-        else:
-            client.publish("sensors/sensor{}/status".format(SENSOR), "c")
-            time.sleep(0.1)
+while True:
+    count = count + 1
+    # return a 8x8 matrix + min&max heats out of them
+    try:
+        image = ge.get_sensor_data()
+    except:
+        break
+    image_data=str(image[0])
+    if (count>3):
+        if count == 33:
+            count = 4
+        # publish image_data to "sensors/sensor1" topic
+        client.publish("sensors/sensor{}/data".format(SENSOR), image_data)
+        time.sleep(0.001)
     else:
-        count = 0
-        client.publish("sensors/sensor{}/status".format(SENSOR), "w")
-        time.sleep(1)
-    client.check_msg()
+        time.sleep(0.1)
 # client disconnected
-client.publish("sensors/sensor{}/status".format(SENSOR), "d")
 time.sleep(0.1)
-pycom.rgbled(0xff00ff)
+pycom.rgbled(0xff0000)
 time.sleep(5)
