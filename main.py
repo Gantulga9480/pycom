@@ -19,7 +19,7 @@ time.sleep(0.1)
 
 # Wifi connection
 wlan = WLAN(mode=WLAN.STA)
-wlan.connect("Univision_83A3", auth=(WLAN.WPA2, "88640783")) 
+wlan.connect("TP-Link_5FF2", auth=(WLAN.WPA2, "12345678Aa")) 
 while not wlan.isconnected():  
     machine.idle()
 
@@ -31,12 +31,14 @@ client.connect()
 # using GridEye to get readings
 ge = GridEye()
 ge.reset(flags_only=True)
-
+time.sleep(0.1)
+pycom.rgbled(0x00ff00)
+time.sleep(0.1)
 count = 0
+connected = True
 # Publishing data
 while True:
     count = count + 1
-    # return a 8x8 matrix + min&max heats out of them
     try:
         image = ge.get_sensor_data()
     except:
@@ -45,7 +47,6 @@ while True:
     if (count>3):
         if count == 33:
             count = 4
-        # publish image_data to "sensors/sensor1" topic
         client.publish("sensors/sensor{}/data".format(SENSOR), image_data)
         time.sleep(0.001)
     else:
