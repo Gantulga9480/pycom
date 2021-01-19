@@ -27,7 +27,7 @@ while not wlan.isconnected():
 client = MQTTClient("wipy{}".format(SENSOR), "192.168.1.60", port=1883) 
 client.set_callback(sub_cb)
 client.connect()
-
+client.publish(topic="sensor/status", msg="{} connected".format(SENSOR), retain=False, qos=0)
 # using GridEye to get readings
 ge = GridEye()
 ge.reset(flags_only=True)
